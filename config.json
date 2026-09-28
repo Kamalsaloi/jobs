@@ -9,13 +9,28 @@
     "gemini-flash-lite-latest",
     "gemini-3.5-flash-lite"
   ],
-  "jobs_per_ai_request": 15,
+  "jobs_per_ai_request": 10,
   "min_score_to_show": 50,
   "max_jobs_to_score_per_run": 200,
   "max_posting_age_days": 7,
   "report_window_days": 7,
   "publish": true,
   "kit_min_score": 70,
+  "experience_caps": [
+    [
+      5,
+      35
+    ],
+    [
+      3,
+      55
+    ],
+    [
+      2,
+      80
+    ]
+  ],
+  "senior_title_cap": 55,
   "max_kits_per_run": 50,
   "common_questions": [
     "Why are you interested in this role?",

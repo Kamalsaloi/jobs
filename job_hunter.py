@@ -373,10 +373,64 @@ SCHEMA = {
 }
 
 
+YEARS_RE = re.compile(r"(\d{1,2})\s*\+?\s*(?:(?:-|–|—|‑|‐|to)\s*\d{1,2}\s*\+?\s*)?(?:years?|yrs)\b", re.I)
+REQ_WORDS = re.compile(r"experience|\bexp\b|designing|building|professional|hands-on|behind you|track record|"
+                       r"\b(?:in|of) (?:product|ux|ui|design|software|front|web|saas|interaction|visual|motion)", re.I)
+NARRATIVE = re.compile(r"\b(has been|have been|had been|founders?|founded|we've|we have|our (?:team|company|founders?)|"
+                       r"spen[dt]|repeating|in business|since \d{4}|years? old|history|ago|anniversary)\b", re.I)
+
+
+def required_years(text):
+    """Minimum years of experience the posting asks of the candidate: the highest lower bound across requirement
+    sentences ("4-6 years of experience" -> 4). Narrative sentences about founders or the company are ignored."""
+    best, quote = None, ""
+    for sent in re.split(r"(?<=[.!?])\s+|\n|•|;", text or ""):
+        if NARRATIVE.search(sent) or not REQ_WORDS.search(sent):
+            continue
+        for m in YEARS_RE.finditer(sent):
+            n = int(m.group(1))
+            if n <= 20 and (best is None or n > best):
+                best, quote = n, sent.strip()
+    return best, quote[:180]
+
+
+def apply_experience_rules(j, cfg):
+    """Cap the score when the posting asks for more experience than the candidate has."""
+    parsed, _ = required_years(j.get("description"))
+    ai = j.get("years_required")
+    req = parsed if parsed is not None else (ai if isinstance(ai, int) and ai >= 0 else None)
+    j["years_required"] = req if req is not None else -1
+    cap = None
+    if req is not None:
+        cap = next((c for min_years, c in cfg["experience_caps"] if req >= min_years), None)
+    elif re.search(r"\b(senior|sr)\b", j["title"], re.I):
+        cap = cfg["senior_title_cap"]
+    if cap is not None and j["score"] > cap:
+        j["score"] = cap
+        flags = j.get("red_flags") or ""
+        if not re.search(r"\d+\s*\+?\s*(?:years?|yrs)", flags, re.I):
+            note = f"Asks for {req}+ years of experience" if req is not None else "Senior role"
+            j["red_flags"] = f"{note} (you have under 1)" + (f"; {flags}" if flags else "")
+    j["verdict"] = "APPLY" if j["score"] >= 70 else "MAYBE" if j["score"] >= 50 else "SKIP"
+
+
+def job_text_for_ai(j, limit=8000):
+    """Full description when it fits; otherwise the opening plus the requirement-heavy sentences."""
+    d = j.get("description") or ""
+    if len(d) <= limit:
+        return d or "(not available)"
+    head = d[:limit // 2]
+    keep = [x for x in re.split(r"(?<=[.!?])\s+|\n", d[limit // 2:]) if REQ_WORDS.search(x) or YEARS_RE.search(x)
+            or re.search(r"\b(must|require|fluent|degree|language|on-?site|office|citizen|authori[sz])", x, re.I)]
+    return head + "\n[...]\n" + "\n".join(keep)[:limit // 2]
+
+
 def score_batch(batch, resume, cfg, keys):
     listing = "\n\n".join(
         f"### JOB id={j['id']}\nTitle: {j['title']}\nCompany: {j['company']}\nLocation: {j['location']}\n"
-        f"Source: {j['source']}\nApplicants so far: {j.get('applicants') or 'unknown'}\nExtra: {j['extra']}\nDescription:\n{j['description'][:2500] or '(not available)'}"
+        f"Source: {j['source']}\nApplicants so far: {j.get('applicants') or 'unknown'}\nExtra: {j['extra']}\n"
+        + (lambda y: f"Experience asked (parsed from the text): {y[0]}+ years - \"{y[1]}\"\n" if y[0] is not None else "")(required_years(j.get("description")))
+        + f"Description:\n{job_text_for_ai(j)}"
         for j in batch)
     prompt = f"""You are a sharp tech recruiter screening job postings for one candidate.
 
@@ -402,7 +456,8 @@ Score every job below 0-100 for how worthwhile it is for this candidate to apply
 - Competition (15%): fewer applicants is better. Use the applicant count when given (under 50 = great, over 200 = poor). Non-US foreign remote roles (Europe, UAE, Singapore, Australia, Canada) and small startups usually draw fewer applicants than big US remote roles.
 verdict: APPLY (score >= 70), MAYBE (50-69), SKIP (< 50).
 why: <= 25 words, specific to this job (what matches, what's the hook). red_flags: <= 15 words or "".
-years_required: the minimum years stated, or -1 if not stated.
+years_required: the minimum years of experience the posting asks OF THE CANDIDATE (not company or founder history), or -1 if not stated.
+HARD REQUIREMENTS: read the whole description. If the candidate clearly fails a hard requirement stated anywhere (years of experience, a required language such as German/Dutch/Arabic fluency, a required degree he lacks, security clearance, local residency, on-site abroad), score <= 40 and name it in red_flags.
 region: where the hiring company/team is (India, US, UK, Europe, Middle East, APAC, Canada, or Global if unclear).
 
 {listing}"""
@@ -632,6 +687,48 @@ def build_kits(db, cfg, resume, keys):
     log(f"  {done} application kits ready")
 
 
+def score_jobs(cands, resume, cfg, keys, use_ai=True):
+    results = {}
+    if use_ai:
+        size = cfg.get("jobs_per_ai_request", 10)
+        for i in range(0, len(cands), size):
+            if not quota_left(cfg, keys):
+                log("  all Gemini daily quotas used; remaining jobs will be scored next run")
+                break
+            try:
+                results.update(score_batch(cands[i:i + size], resume, cfg, keys))
+            except Exception as e:
+                log(f"  batch {i // size}: {e}; will retry these next run")
+            time.sleep(7)  # stay under free-tier requests/minute
+    for j in cands:
+        r = results.get(j["id"])
+        j["ai_scored"] = int(r is not None)
+        r = r or keyword_score(j)
+        j.update({k: r.get(k, "") for k in ["score", "verdict", "why", "red_flags", "years_required", "region"]})
+        j["region"] = infer_region(j["location"], j["region"])
+        if r.get("location_ok") is False:
+            j["score"] = min(j["score"], 20)
+        apply_experience_rules(j, cfg)
+    return results
+
+
+def rescore_recent(db, cfg, resume, keys):
+    """Re-score everything in the report window with the current prompt and rules."""
+    cols = [r[1] for r in db.execute("PRAGMA table_info(jobs)")]
+    rows = [dict(zip(cols, r)) for r in db.execute(
+        "SELECT * FROM jobs WHERE first_seen >= ?", ((NOW - timedelta(days=cfg["report_window_days"])).isoformat(),))]
+    log(f"Re-scoring {len(rows)} jobs from the past {cfg['report_window_days']} days")
+    before = {j["id"]: j["score"] for j in rows}
+    results = score_jobs(rows, resume, cfg, keys)
+    done = [j for j in rows if j["id"] in results]
+    db.executemany("UPDATE jobs SET score=?, verdict=?, why=?, red_flags=?, years_required=?, region=?, ai_scored=1 "
+                   "WHERE id=?", [(j["score"], j["verdict"], j["why"], j["red_flags"], j["years_required"],
+                                   j["region"], j["id"]) for j in done])
+    db.commit()
+    dropped = sum(1 for j in done if before[j["id"]] >= 70 > j["score"])
+    log(f"  re-scored {len(done)}/{len(rows)}; {dropped} fell out of 'Apply now'")
+
+
 def keyword_score(j):
     t = (j["title"] + " " + j["description"]).lower()
     s = 40
@@ -774,9 +871,12 @@ def main():
         log("GEMINI_API_KEY missing; falling back to keyword scoring")
         use_ai = False
     db = open_db()
+    if "--rescore" in sys.argv and keys:
+        rescore_recent(db, cfg, read_resume(cfg["resume_path"]), keys)
+        build_kits(db, cfg, read_resume(cfg["resume_path"]), keys)
     if "--kits-only" in sys.argv and keys:
         build_kits(db, cfg, read_resume(cfg["resume_path"]), keys)
-    if "--report-only" in sys.argv or "--kits-only" in sys.argv:
+    if "--report-only" in sys.argv or "--kits-only" in sys.argv or "--rescore" in sys.argv:
         row = db.execute("SELECT ts, stats FROM runs ORDER BY ts DESC LIMIT 1").fetchone()
         stats = json.loads(row[1]) if row and row[1] else {"fetched": 0, "candidates": 0, "by_source": {}}
         path, n_new = write_report(db, cfg, row[0] if row else "", stats)
@@ -835,26 +935,7 @@ def main():
         log(f"  {len(failed)} LinkedIn jobs skipped (description didn't load); they'll be retried next run")
 
     cands = retry + cands
-    results = {}
-    if use_ai:
-        size = cfg.get("jobs_per_ai_request", 15)
-        for i in range(0, len(cands), size):
-            if not quota_left(cfg, keys):
-                log("  all Gemini daily quotas used; remaining jobs will be scored next run")
-                break
-            try:
-                results.update(score_batch(cands[i:i + size], resume, cfg, keys))
-            except Exception as e:
-                log(f"  batch {i // size}: {e}; will retry these next run")
-            time.sleep(7)  # stay under free-tier requests/minute
-    for j in cands:
-        r = results.get(j["id"])
-        j["ai_scored"] = int(r is not None)
-        r = r or keyword_score(j)
-        j.update({k: r.get(k, "") for k in ["score", "verdict", "why", "red_flags", "years_required", "region"]})
-        j["region"] = infer_region(j["location"], j["region"])
-        if r.get("location_ok") is False:
-            j["score"] = min(j["score"], 20)
+    score_jobs(cands, resume, cfg, keys, use_ai)
 
     first_seen = NOW.isoformat()
     db.executemany("""INSERT OR REPLACE INTO jobs (id, dedupe_key, source, title, company, location, url, posted,
