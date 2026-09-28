@@ -1,0 +1,244 @@
+{
+  "candidate_name": "Kamal Saloi",
+  "resume_path": "C:/Users/SPURGE/Downloads/Kamal_Saloi_Resume.docx",
+  "preferences": "Kamal is an early-career Product Designer (Founding Product Designer at an AI B2B startup since Feb 2026, plus self-directed projects) who also ships production React/TypeScript. Strongest fit: product/UX/UI designer or design-engineer roles at AI, B2B SaaS or early-stage product startups where design + frontend overlap is valued. Location: any Indian city (on-site, hybrid or remote); abroad only fully remote roles (US, UK, Europe, UAE/Middle East, Singapore, Australia, Canada) that can hire someone in India as a contractor or via an employer-of-record. Prefers roles with fewer applicants. Higher pay is always better when the role fits; the only hard floor is ₹50,000/month (₹6 LPA) or equivalent. Roles demanding 4+ years, people management, or pure graphic/marketing design are poor fits.",
+  "min_monthly_pay_inr": 50000,
+  "gemini_models": [
+    "gemini-flash-latest",
+    "gemini-3.5-flash",
+    "gemini-flash-lite-latest",
+    "gemini-3.5-flash-lite"
+  ],
+  "jobs_per_ai_request": 15,
+  "min_score_to_show": 50,
+  "max_jobs_to_score_per_run": 200,
+  "max_posting_age_days": 7,
+  "report_window_days": 7,
+  "publish": true,
+  "kit_min_score": 70,
+  "max_kits_per_run": 50,
+  "common_questions": [
+    "Why are you interested in this role?",
+    "Tell us about a project you are proud of and your role in it.",
+    "How many years of product design experience do you have?",
+    "What is your notice period / earliest start date?",
+    "What are your salary expectations?",
+    "Where are you based, and do you need visa sponsorship or work authorization for this role?",
+    "Link to your portfolio"
+  ],
+  "linkedin_keywords": [
+    "Product Designer",
+    "UI UX Designer",
+    "UX Designer",
+    "Design Engineer",
+    "UX Engineer",
+    "Founding Designer"
+  ],
+  "linkedin_searches": [
+    {
+      "label": "Bengaluru",
+      "location": "Bengaluru, Karnataka, India"
+    },
+    {
+      "label": "India (all cities)",
+      "location": "India",
+      "pages": 3
+    },
+    {
+      "label": "Remote India",
+      "location": "India",
+      "remote": true
+    },
+    {
+      "label": "US remote",
+      "location": "United States",
+      "remote": true,
+      "keywords": [
+        "Product Designer",
+        "UX Designer",
+        "Design Engineer"
+      ]
+    },
+    {
+      "label": "UK remote",
+      "location": "United Kingdom",
+      "remote": true,
+      "keywords": [
+        "Product Designer",
+        "UX Designer",
+        "Design Engineer"
+      ]
+    },
+    {
+      "label": "EU remote",
+      "location": "European Union",
+      "remote": true,
+      "keywords": [
+        "Product Designer",
+        "UX Designer",
+        "Design Engineer"
+      ]
+    },
+    {
+      "label": "Germany remote",
+      "location": "Germany",
+      "remote": true,
+      "pages": 1,
+      "keywords": [
+        "Product Designer",
+        "UX Designer"
+      ]
+    },
+    {
+      "label": "Netherlands remote",
+      "location": "Netherlands",
+      "remote": true,
+      "pages": 1,
+      "keywords": [
+        "Product Designer",
+        "UX Designer"
+      ]
+    },
+    {
+      "label": "Ireland remote",
+      "location": "Ireland",
+      "remote": true,
+      "pages": 1,
+      "keywords": [
+        "Product Designer",
+        "UX Designer"
+      ]
+    },
+    {
+      "label": "UAE remote",
+      "location": "United Arab Emirates",
+      "remote": true,
+      "pages": 1,
+      "keywords": [
+        "Product Designer",
+        "UX Designer",
+        "UI UX Designer"
+      ]
+    },
+    {
+      "label": "Singapore remote",
+      "location": "Singapore",
+      "remote": true,
+      "pages": 1,
+      "keywords": [
+        "Product Designer",
+        "UX Designer"
+      ]
+    },
+    {
+      "label": "Australia remote",
+      "location": "Australia",
+      "remote": true,
+      "pages": 1,
+      "keywords": [
+        "Product Designer",
+        "UX Designer"
+      ]
+    },
+    {
+      "label": "Canada remote",
+      "location": "Canada",
+      "remote": true,
+      "pages": 1,
+      "keywords": [
+        "Product Designer",
+        "UX Designer"
+      ]
+    }
+  ],
+  "wellfound_roles": [
+    "product-designer",
+    "ux-designer",
+    "ui-ux-designer",
+    "design-engineer"
+  ],
+  "wellfound_location_slugs": [
+    "bangalore",
+    "india",
+    "mumbai",
+    "hyderabad",
+    "pune",
+    "gurgaon"
+  ],
+  "wellfound_include_remote": true,
+  "remote_board_queries": [
+    "product designer",
+    "ux designer",
+    "ui designer",
+    "design engineer"
+  ],
+  "title_must_match": "designer|design engineer|product design|\\bux\\b|\\bui\\b",
+  "title_exclude": [
+    "staff",
+    "principal",
+    "director",
+    "head of",
+    "vp",
+    "vice president",
+    "manager",
+    "lead",
+    "graphic",
+    "interior",
+    "fashion",
+    "mechanical",
+    "civil",
+    "electrical",
+    "hardware",
+    "circuit",
+    "instructional",
+    "game",
+    "level designer",
+    "industrial",
+    "packaging",
+    "textile",
+    "jewel",
+    "architect",
+    "sound",
+    "print",
+    "cad",
+    "structural",
+    "piping",
+    "landscape",
+    "embroidery"
+  ],
+  "remote_location_ok": [
+    "india",
+    "asia",
+    "apac",
+    "worldwide",
+    "anywhere",
+    "global",
+    "international",
+    "usa",
+    "us",
+    "united states",
+    "north america",
+    "americas",
+    "uk",
+    "united kingdom",
+    "england",
+    "europe",
+    "emea",
+    "eu",
+    "germany",
+    "netherlands",
+    "ireland",
+    "uae",
+    "united arab emirates",
+    "dubai",
+    "middle east",
+    "gcc",
+    "saudi arabia",
+    "qatar",
+    "singapore",
+    "australia",
+    "new zealand",
+    "canada",
+    "israel"
+  ]
+}

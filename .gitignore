@@ -1,0 +1,10 @@
+# Secrets: API keys and the report password never go to git
+.env
+
+# Local working data (database, logs, raw reports, tracker)
+data/
+logs/
+reports/
+latest.html
+tracker.csv
+__pycache__/

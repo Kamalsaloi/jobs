@@ -1,0 +1,26 @@
+{
+  "_note": "Facts the AI may use when drafting application answers. It will never invent anything beyond these, the resume and the portfolio. Edit freely. Anything left empty becomes [FILL IN] in drafts.",
+  "name": "Kamal Saloi",
+  "email": "kamalsaloi2004@gmail.com",
+  "phone": "+91 9707784514",
+  "based_in": "Bengaluru, India",
+  "portfolio": "https://kamalsaloi.vercel.app/",
+  "linkedin": "https://linkedin.com/in/kamal-saloi-01731b342",
+  "notice_period": "Immediate. I can start right away.",
+  "current_ctc": "",
+  "salary_strategy": "Never anchor low. If the posting states a pay range, ask for the upper half of that range. If no range is given, say my expectation is in line with the market rate for this role, level and location, and that I'm open to discussing based on scope and the full offer. Only give a specific number if one is listed in expected_pay_number; otherwise write [FILL IN: expected pay] when a form requires a number.",
+  "expected_pay_number": "",
+  "work_authorization": "Indian citizen based in Bengaluru. For roles outside India I work remotely as an independent contractor or through an employer-of-record (Deel, Remote.com, etc.), so no visa sponsorship is needed. I do not hold US/UK/EU work authorization.",
+  "relocation": "Open to relocating anywhere in India. Not relocating abroad; remote only for international roles.",
+  "employment_type": "Open to full-time and contract roles.",
+  "timezone": "IST (UTC+5:30). Comfortable overlapping 3–4 hours with Europe or the US East Coast.",
+  "years_experience": "About 8 months full-time as Founding Product Designer at AiDOOS (Feb 2026 to present), owning design end to end, plus self-directed redesign projects.",
+  "reason_for_looking": "I want to grow on a product with a larger design and engineering team, where owning design end to end and shipping it in code is valued.",
+  "portfolio_highlights": [
+    "AiDOOS AI proposal flow (Delivery Blueprint): from a single line of text to a signed, priced proposal; designed from user flow to high-fidelity UI and shipped in React/TypeScript.",
+    "'An AI that tells you what to build': case study on making users trust an AI-written brief (give value before asking, show the research happening, state what the report cannot know).",
+    "AiDOOS unified design system used across multiple product repositories, plus two role-specific dashboards and onboarding.",
+    "Landeed redesign (self-directed): property-records platform for India, reframed onboarding so search is the front door and users see records before being asked for a phone number; recorded audit + redesign walkthrough.",
+    "Landing-page hero redesigns for early-stage AI products (Velociti, Pull Logic, SAHI), delivered as live responsive builds with design-reasoning walkthroughs."
+  ]
+}
