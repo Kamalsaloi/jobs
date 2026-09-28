@@ -727,6 +727,11 @@ def write_report(db, cfg, run_ts, stats):
     return path, sum(j["is_new"] for j in jobs)
 
 
+def cfg_repo():
+    url = subprocess.run(["git", "remote", "get-url", "origin"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
+    return re.sub(r"^.*github\.com[/:]|\.git$", "", url)
+
+
 def publish():
     """Encrypt the report into docs/index.html and push it; the host (Vercel/Pages) redeploys on push."""
     if not os.environ.get("PAGE_PASSWORD") or not os.path.isdir(os.path.join(ROOT, ".git")):
@@ -740,6 +745,14 @@ def publish():
             raise RuntimeError(f"{' '.join(cmd[:2])}: {(r.stderr or r.stdout).strip()[:300]}")
 
     try:
+        # Safety net: the repo holds personal files, so never push while it is publicly visible.
+        try:
+            fetch("https://api.github.com/repos/" + cfg_repo(), retries=0, timeout=20)
+            log("  publish skipped: GitHub repo is PUBLIC. Make it private first.")
+            return
+        except urllib.error.HTTPError as e:
+            if e.code != 404:
+                raise
         run("node", "encrypt_page.mjs", os.path.join(DATA, "publish.html"), os.path.join(ROOT, "docs", "index.html"),
             os.path.join(DATA, "page_salt.txt"))
         run("git", "add", "docs/index.html")
